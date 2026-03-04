@@ -1,0 +1,5 @@
+title: write a constraint on a. such that it is different from the past 5 values.
+
+difficulty: Easy
+tags: 
+related: 

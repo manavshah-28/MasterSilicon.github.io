@@ -1,0 +1,5 @@
+title: Write code to randomize "rand bit [31:0] rand_var" such that it must have a binary pattern 110011 in its binary representation 
+
+difficulty: Easy
+tags: 
+related: 

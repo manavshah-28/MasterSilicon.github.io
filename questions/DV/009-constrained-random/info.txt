@@ -1,0 +1,5 @@
+title: Write constraints to randomize "rand bit [31:0] rand_var" such that, it must be and odd number less than 1000 ( eg: 1,3,5,7… 99 so on )
+
+difficulty: Easy
+tags: 
+related: 

@@ -1,0 +1,4 @@
+## Write code to randomize "rand bit [31:0] rand_var" such that it must have exactly three instance of the binary pattern 3’b110
+
+> TIP: 
+

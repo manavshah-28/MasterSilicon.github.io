@@ -1,0 +1,5 @@
+title: Write code to randomize "rand bit [31:0] rand_var" such that it must be a palindrome in its hex representation ( eg: faaf, 1f1f1, 8cfdfc8 and so on )
+
+difficulty: Easy
+tags: 
+related: 

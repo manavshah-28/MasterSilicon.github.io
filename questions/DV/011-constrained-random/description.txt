@@ -1,0 +1,4 @@
+## Write constraints to randomize "rand bit [31:0] rand_var" such that it must be a number from the fibonnaci series ( 1,2,3,5…21 so on )
+
+> TIP: 
+

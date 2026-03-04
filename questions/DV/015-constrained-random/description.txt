@@ -1,0 +1,4 @@
+## Write code to randomize "rand bit [31:0] rand_var" such that it must be a perfect power of 2 ( eg: 1, 2, 4, 8, 16, 32 … so on )
+
+> TIP: 
+

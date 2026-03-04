@@ -1,0 +1,4 @@
+## Write constraints to randomize "rand bit [31:0] rand_var" such that it must be a palindrome number ( eg: 121, 3223, 12133121 and so on )
+
+> TIP: 
+

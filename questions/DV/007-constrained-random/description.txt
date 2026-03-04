@@ -1,0 +1,4 @@
+## Write a code to have the cyclic randomization behaviour without using the randc keyword
+
+> TIP: 
+
