@@ -1,0 +1,4 @@
+title: R2W1 Regfile
+difficulty: Hard
+tags: Memory
+related: 

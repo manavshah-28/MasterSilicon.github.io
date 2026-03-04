@@ -52,7 +52,7 @@
     {
       "id": "RTL-002",
       "category": "RTL",
-      "folder": "RTL/002-fsm-sequence-detector"
+      "folder": "RTL/002-R2W1-Regfile"
     },
     {
       "id": "DFT-001",
