@@ -70,6 +70,21 @@
       "folder": "DV/002-constrained-random"
     },
     {
+      "id": "DV-003",
+      "category": "DV",
+      "folder": "DV/003-constrained-random"
+    },
+    {
+      "id": "DV-004",
+      "category": "DV",
+      "folder": "DV/004-constrained-random"
+    },
+    {
+      "id": "DV-005",
+      "category": "DV",
+      "folder": "DV/005-constrained-random"
+    },
+    {
       "id": "CDC-001",
       "category": "CDC",
       "folder": "CDC/001-two-ff-synchronizer"

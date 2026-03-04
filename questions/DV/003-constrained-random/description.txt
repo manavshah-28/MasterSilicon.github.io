@@ -1,0 +1,3 @@
+## Write constraints for 0-100 range is 70% and 101-255 range is 30%
+
+> TIP:  `dist {[0:100] :/ 70, [101:255] :/ 30};`

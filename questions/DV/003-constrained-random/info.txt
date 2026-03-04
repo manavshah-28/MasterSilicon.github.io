@@ -1,0 +1,5 @@
+title: Write constraints for 0-100 range is 70% and 101-255 range is 30% 
+
+difficulty: Easy
+tags: randomize, constraints
+related: 

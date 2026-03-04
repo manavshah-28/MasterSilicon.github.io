@@ -1,0 +1,5 @@
+title: Write a constraint such that sum of any three consecutive elements in an array should be an even number
+
+difficulty: Easy
+tags: 
+related: 

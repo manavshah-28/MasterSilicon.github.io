@@ -1,0 +1,4 @@
+## Write a constraint for two random variables such that one variable should not match with the other & the total number of bits toggled in one variable should be exactly five with respect to the other variable ( for example : 8'b11100001 and 8'b00001011 )
+
+> TIP: 
+
