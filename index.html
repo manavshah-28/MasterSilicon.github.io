@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ModernSilicon — Hardware Design Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --bg:         #050d18;
+  --bg2:        #081425;
+  --bg3:        #0b1c32;
+  --bg4:        #0f2441;
+  --bg5:        #152d4e;
+  --line:       #152d4e;
+  --line2:      #1e3d5f;
+  --teal:       #00e8c8;
+  --teal2:      #00c4aa;
+  --teal-dim:   rgba(0,232,200,.08);
+  --teal-glow:  rgba(0,232,200,.15);
+  --cyan:       #38bdf8;
+  --cyan-dim:   rgba(56,189,248,.1);
+  --green:      #22d3a0;
+  --green-dim:  rgba(34,211,160,.12);
+  --amber:      #fbbf24;
+  --amber-dim:  rgba(251,191,36,.1);
+  --red:        #fb7185;
+  --red-dim:    rgba(251,113,133,.1);
+  --violet:     #a78bfa;
+  --violet-dim: rgba(167,139,250,.1);
+  --txt:        #cde4f5;
+  --txt2:       #6a93b8;
+  --txt3:       #334f6b;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--txt);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grid texture */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(0,232,200,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,232,200,.018) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* Ambient glows */
+.amb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(130px); opacity: .25; }
+.amb-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(0,232,200,.18), transparent 70%); top: -250px; left: -150px; }
+.amb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(56,189,248,.12), transparent 70%); bottom: -100px; right: -100px; }
+.amb-3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(167,139,250,.08), transparent 70%); top: 40%; left: 50%; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--teal); }
+
+/* ═══════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════ */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; gap: 0;
+  padding: 0 24px; height: 56px;
+  background: rgba(5,13,24,.94);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(20px);
+}
+
+.nav-logo {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 19px;
+  letter-spacing: -1px; cursor: pointer; user-select: none;
+  background: linear-gradient(120deg, var(--teal) 0%, var(--cyan) 55%, var(--violet) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-right: 28px; white-space: nowrap;
+}
+
+.nav-tabs { display: flex; gap: 2px; }
+.ntab {
+  padding: 5px 13px; border-radius: 6px; font-size: 13px; font-weight: 500;
+  color: var(--txt2); cursor: pointer; background: none; border: none;
+  font-family: inherit; transition: all .15s; letter-spacing: .1px;
+}
+.ntab:hover { background: var(--bg3); color: var(--txt); }
+.ntab.on { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(0,232,200,.2); }
+
+.nav-r { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+.prog-pill {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Space Mono', monospace; font-size: 11px; color: var(--txt2);
+  background: var(--bg3); border: 1px solid var(--line);
+  padding: 4px 12px 4px 8px; border-radius: 100px;
+}
+.pp-track { width: 56px; height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden; }
+.pp-fill  { height: 100%; background: linear-gradient(90deg, var(--teal), var(--cyan)); border-radius: 2px; transition: width .5s; }
+.pp-val   { color: var(--txt); font-weight: 700; }
+
+/* ═══════════════════════════════════════════
+   PAGE SWITCHING
+═══════════════════════════════════════════ */
+.page { display: none; position: relative; z-index: 1; }
+.page.on { display: block; }
+
+/* ═══════════════════════════════════════════
+   HOME / HERO
+═══════════════════════════════════════════ */
+.hero {
+  max-width: 1080px; margin: 0 auto;
+  padding: 88px 32px 80px;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1.8px;
+  text-transform: uppercase; color: var(--teal);
+  background: var(--teal-dim); border: 1px solid rgba(0,232,200,.18);
+  padding: 5px 14px; border-radius: 100px; margin-bottom: 30px;
+}
+.badge-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--teal);
+  animation: blink 2.2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.7)} }
+
+.hero-h {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(44px, 7.5vw, 84px); line-height: .97;
+  letter-spacing: -3.5px; margin-bottom: 22px;
+}
+.hero-h .g {
+  background: linear-gradient(115deg, var(--teal) 0%, var(--cyan) 40%, var(--violet) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+  font-size: 16px; font-weight: 300; color: var(--txt2);
+  line-height: 1.78; max-width: 520px; margin-bottom: 36px;
+}
+
+.hero-cta { display: flex; gap: 11px; flex-wrap: wrap; margin-bottom: 64px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none; font-family: inherit; transition: all .17s;
+  text-decoration: none; white-space: nowrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  color: var(--bg);
+}
+.btn-primary:hover { box-shadow: 0 0 28px rgba(0,232,200,.3); transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent; color: var(--txt2);
+  border: 1px solid var(--line2);
+}
+.btn-ghost:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-dim); }
+
+/* Stats bar */
+.stats-bar {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--line);
+  border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+}
+.stat { padding: 22px 26px; background: var(--bg2); transition: background .2s; }
+.stat:hover { background: var(--bg3); }
+.stat-n {
+  font-family: 'Space Mono', monospace; font-size: 26px; font-weight: 700;
+  background: linear-gradient(135deg, var(--teal), var(--cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  display: block; margin-bottom: 4px;
+}
+.stat-l { font-size: 10px; color: var(--txt3); text-transform: uppercase; letter-spacing: 1.8px; font-weight: 600; }
+
+.section-label {
+  font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--txt3); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::after { content:''; flex:1; height:1px; background: var(--line); }
+
+.features { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 12px; margin-top: 36px; }
+.feat-card {
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 12px;
+  padding: 22px; transition: all .2s; position: relative; overflow: hidden;
+}
+.feat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--teal), transparent);
+  opacity: 0; transition: opacity .2s;
+}
+.feat-card:hover { border-color: var(--line2); transform: translateY(-2px); }
+.feat-card:hover::before { opacity: 1; }
+.feat-icon { font-size: 24px; margin-bottom: 12px; }
+.feat-h { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 7px; }
+.feat-p { font-size: 12.5px; color: var(--txt2); line-height: 1.7; }
+
+/* ═══════════════════════════════════════════
+   TRACKER LAYOUT
+═══════════════════════════════════════════ */
+.tracker-layout { display: flex; height: calc(100vh - 56px); overflow: hidden; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  border-right: 1px solid var(--line);
+  overflow-y: auto; padding: 16px 10px;
+  background: var(--bg2);
+}
+
+.sidebar-prog {
+  background: var(--bg3); border: 1px solid var(--line); border-radius: 10px;
+  padding: 13px; margin-bottom: 16px;
+}
+.sp-label { font-size: 11px; color: var(--txt2); margin-bottom: 7px; display: flex; justify-content: space-between; }
+.sp-track { background: var(--bg4); border-radius: 4px; height: 5px; overflow: hidden; margin-bottom: 5px; }
+.sp-fill  { height: 100%; background: linear-gradient(90deg, var(--teal), var(--cyan)); border-radius: 4px; transition: width .5s; }
+.sp-nums  { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--txt3); }
+
+.ss-title {
+  font-family: 'Space Mono', monospace; font-size: 9px; font-weight: 700;
+  color: var(--txt3); text-transform: uppercase; letter-spacing: 2px;
+  padding: 0 8px; margin-bottom: 6px; margin-top: 4px;
+}
+
+.slink {
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  padding: 6px 9px; border-radius: 7px; font-size: 12px; font-weight: 500;
+  color: var(--txt2); cursor: pointer; background: none; border: none;
+  font-family: inherit; transition: all .12s; text-align: left; margin-bottom: 1px;
+}
+.slink:hover { background: var(--bg3); color: var(--txt); }
+.slink.on { background: var(--teal-dim); color: var(--teal); font-weight: 600; }
+.slink-cnt {
+  margin-left: auto; font-family: 'Space Mono', monospace; font-size: 9px;
+  background: var(--bg3); color: var(--txt3); padding: 1px 5px; border-radius: 5px;
+}
+.slink.on .slink-cnt { background: rgba(0,232,200,.12); color: var(--teal); }
+.cat-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.ss-sep { height: 1px; background: var(--line); margin: 8px 4px; }
+
+/* ── Q Main ── */
+.qmain { flex: 1; overflow-y: auto; padding: 20px 26px; min-width: 0; }
+
+.qtoolbar { display: flex; align-items: center; gap: 9px; margin-bottom: 16px; }
+.qsearch {
+  flex: 1; display: flex; align-items: center; gap: 7px;
+  background: var(--bg2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 8px 12px; transition: border-color .2s; max-width: 380px;
+}
+.qsearch:focus-within { border-color: var(--teal); }
+.qsearch input { flex:1; background: none; border: none; outline: none; font-family: inherit; font-size: 13px; color: var(--txt); }
+.qsearch input::placeholder { color: var(--txt3); }
+
+.qfilter { display: flex; gap: 5px; }
+.ftag {
+  padding: 5px 11px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  cursor: pointer; background: var(--bg2); border: 1px solid var(--line); color: var(--txt2);
+  font-family: inherit; transition: all .12s;
+}
+.ftag:hover { border-color: var(--line2); color: var(--txt); }
+.ftag.on   { background: var(--teal-dim); border-color: rgba(0,232,200,.3); color: var(--teal); }
+.ftag.e-f.on { background: var(--green-dim); border-color: rgba(34,211,160,.3); color: var(--green); }
+.ftag.m-f.on { background: var(--amber-dim); border-color: rgba(251,191,36,.3); color: var(--amber); }
+.ftag.h-f.on { background: var(--red-dim);   border-color: rgba(251,113,133,.3); color: var(--red); }
+
+/* Category header */
+.cat-hdr {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+  margin-bottom: 12px; margin-top: 6px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.cat-icon {
+  width: 36px; height: 36px; border-radius: 8px; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg3); flex-shrink: 0;
+}
+.cat-prog-mini {
+  margin-left: auto; display: flex; align-items: center; gap: 7px;
+  font-family: 'Space Mono', monospace; font-size: 10px; color: var(--txt3);
+}
+.cpm-bar { width: 64px; height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden; }
+.cpm-fill { height: 100%; border-radius: 2px; transition: width .5s; }
+
+/* Question row */
+.qrow {
+  display: flex; align-items: center; gap: 11px;
+  background: var(--bg2); border: 1px solid var(--line);
+  border-radius: 9px; padding: 11px 14px; margin-bottom: 5px;
+  cursor: pointer; transition: all .14s;
+}
+.qrow:hover { border-color: var(--line2); background: var(--bg3); transform: translateX(3px); }
+.qrow.done { border-color: rgba(34,211,160,.2); }
+.qrow.done:hover { border-color: rgba(34,211,160,.38); }
+
+.qchk {
+  width: 19px; height: 19px; border-radius: 5px; flex-shrink: 0;
+  border: 2px solid var(--line2); background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .14s; font-size: 10px;
+}
+.qrow.done .qchk { background: var(--green); border-color: var(--green); color: var(--bg); }
+
+.q-id { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--txt3); width: 50px; flex-shrink: 0; }
+.q-title { font-size: 13px; font-weight: 500; flex: 1; min-width: 0; }
+.qrow.done .q-title { color: var(--txt2); text-decoration: line-through; text-decoration-color: var(--txt3); }
+
+.q-tags { display: flex; gap: 4px; flex-shrink: 0; }
+.qtag {
+  font-family: 'Space Mono', monospace; font-size: 8.5px;
+  padding: 2px 6px; border-radius: 4px;
+  background: var(--bg3); color: var(--txt3); border: 1px solid var(--line);
+  text-transform: uppercase; letter-spacing: .3px;
+}
+
+.diff-badge { padding: 2px 8px; border-radius: 100px; font-size: 9.5px; font-weight: 700; font-family: 'Space Mono', monospace; flex-shrink: 0; }
+.e  { background: var(--green-dim); color: var(--green); }
+.m  { background: var(--amber-dim); color: var(--amber); }
+.h  { background: var(--red-dim);   color: var(--red);   }
+
+.q-arrow {
+  width: 24px; height: 24px; border-radius: 5px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: 1px solid var(--line); color: var(--txt3);
+  cursor: pointer; font-size: 14px; transition: all .12s;
+}
+.q-arrow:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-dim); }
+
+/* Loading states */
+.loading-row {
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 9px;
+  padding: 11px 14px; margin-bottom: 5px; display: flex; align-items: center; gap: 11px;
+  opacity: .5; animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer { 0%,100%{opacity:.5} 50%{opacity:.3} }
+.loading-bar { background: var(--bg4); border-radius: 4px; height: 12px; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--txt3); }
+.empty-state .e-icon { font-size: 38px; margin-bottom: 12px; }
+.empty-state p { font-size: 13px; }
+
+/* Error state */
+.error-state {
+  background: var(--red-dim); border: 1px solid rgba(251,113,133,.2);
+  border-radius: 10px; padding: 16px 20px; margin: 20px 0;
+  font-size: 13px; color: var(--red);
+}
+
+/* ═══════════════════════════════════════════
+   DRAWER
+═══════════════════════════════════════════ */
+.drawer-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,.65); backdrop-filter: blur(5px);
+}
+.drawer-overlay.on { display: block; }
+
+.drawer {
+  position: fixed;
+  inset: 0;                 /* full screen */
+  z-index: 201;
+
+  width: 100vw;
+  height: 100vh;
+
+  background: var(--bg2);
+  border-left: none;        /* remove side border */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+}
+.drawer.on { transform: translateX(0); }
+
+.drawer-head {
+  padding: 18px 22px; border-bottom: 1px solid var(--line);
+  display: flex; align-items: flex-start; gap: 14px; flex-shrink: 0;
+  background: var(--bg3);
+}
+.drawer-close {
+  margin-left: auto; width: 28px; height: 28px; border-radius: 6px;
+  background: none; border: 1px solid var(--line2); color: var(--txt2);
+  cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
+  transition: all .12s; flex-shrink: 0;
+}
+.drawer-close:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+
+/* Drawer tabs */
+.dtabs { display: flex; border-bottom: 1px solid var(--line); background: var(--bg3); flex-shrink: 0; }
+.dtab {
+  padding: 10px 16px; font-size: 10px; font-weight: 700; color: var(--txt3);
+  cursor: pointer; background: none; border: none; font-family: 'Space Mono', monospace;
+  border-bottom: 2px solid transparent; transition: all .12s; margin-bottom: -1px;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.dtab:hover { color: var(--txt); }
+.dtab.on { color: var(--teal); border-bottom-color: var(--teal); }
+.dtab-content { padding: 22px; display: none; overflow-y: auto; flex: 1; }
+.dtab-content.on { display: block; }
+
+/* Concept content */
+.concept-body { font-size: 13px; line-height: 1.85; color: var(--txt2); }
+.concept-body h2 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--teal); margin: 20px 0 9px; text-transform: uppercase; letter-spacing: .8px; }
+.concept-body h3 { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--txt); margin: 14px 0 7px; }
+.concept-body p  { margin-bottom: 11px; }
+.concept-body ul, .concept-body ol { padding-left: 18px; margin-bottom: 10px; }
+.concept-body li { margin-bottom: 5px; }
+.concept-body code { font-family: 'Space Mono', monospace; font-size: 11px; background: var(--bg4); color: var(--teal); padding: 1px 5px; border-radius: 3px; }
+.concept-body pre { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; font-family: 'Space Mono', monospace; font-size: 11.5px; line-height: 1.8; color: var(--txt2); overflow-x: auto; margin: 10px 0; white-space: pre; }
+.concept-body strong { color: var(--txt); font-weight: 600; }
+.concept-body .tip  { background: var(--teal-dim); border: 1px solid rgba(0,232,200,.18); border-radius: 8px; padding: 10px 13px; margin: 10px 0; color: var(--teal); font-size: 12px; }
+.concept-body .warn { background: var(--amber-dim); border: 1px solid rgba(251,191,36,.18); border-radius: 8px; padding: 10px 13px; margin: 10px 0; color: var(--amber); font-size: 12px; }
+.concept-body .sep  { height: 1px; background: var(--line); margin: 18px 0; }
+
+/* Code viewer */
+.code-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg3); border: 1px solid var(--line); border-radius: 9px 9px 0 0;
+  padding: 9px 14px; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--txt3);
+}
+.code-copy {
+  padding: 3px 9px; border-radius: 4px; font-size: 9px; font-family: 'Space Mono', monospace;
+  background: var(--bg4); border: 1px solid var(--line2); color: var(--txt3);
+  cursor: pointer; transition: all .12s;
+}
+.code-copy:hover { border-color: var(--teal); color: var(--teal); }
+
+.code-block {
+  background: var(--bg); border: 1px solid var(--line); border-top: none;
+  border-radius: 0 0 9px 9px; padding: 16px 18px;
+  font-family: 'Space Mono', monospace; font-size: 12px; line-height: 1.85;
+  color: var(--txt); white-space: pre; overflow-x: auto; margin-bottom: 14px;
+  max-height: 420px; overflow-y: auto;
+}
+
+/* Syntax highlight tokens */
+.kw { color: #569cd6; }
+.cm { color: #6a9955; font-style: italic; }
+.nm { color: #b5cea8; }
+.st { color: #ce9178; }
+.sy { color: #0fd3b8; }
+.pp { color: #c586c0; }
+
+/* Answer toggle */
+.ans-toggle {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg3); border: 1px solid var(--line2); border-radius: 8px;
+  padding: 11px 15px; cursor: pointer; font-size: 13px; font-weight: 600;
+  color: var(--txt2); transition: all .15s; margin-bottom: 12px;
+  font-family: inherit; width: 100%; text-align: left;
+}
+.ans-toggle:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-dim); }
+.ans-toggle .tri { transition: transform .2s; font-size: 10px; }
+.ans-toggle.open .tri { transform: rotate(90deg); }
+.ans-hidden { display: none; }
+.ans-hidden.on { display: block; }
+
+/* ═══════════════════════════════════════════
+   COMMANDS PAGE
+═══════════════════════════════════════════ */
+.cmd-layout { max-width: 980px; margin: 0 auto; padding: 34px 28px; }
+
+.cmd-section { margin-bottom: 40px; }
+.cmd-section-title {
+  font-family: 'Syne', sans-serif; font-size: 19px; font-weight: 800;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+}
+
+.cmd-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.cmd-card { background: var(--bg2); border: 1px solid var(--line); border-radius: 9px; overflow: hidden; transition: border-color .2s; }
+.cmd-card:hover { border-color: var(--line2); }
+.cmd-card-head {
+  padding: 10px 14px; background: var(--bg3); border-bottom: 1px solid var(--line);
+  font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; color: var(--teal);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.cmd-card-body { padding: 12px 14px; font-family: 'Space Mono', monospace; font-size: 11px; line-height: 1.8; color: var(--txt2); }
+.copy-btn {
+  padding: 2px 7px; border-radius: 4px; font-size: 9px; font-family: 'Space Mono', monospace;
+  background: var(--bg4); border: 1px solid var(--line2); color: var(--txt3);
+  cursor: pointer; transition: all .12s;
+}
+.copy-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+pre.cmd {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 9px;
+  padding: 16px 18px; font-family: 'Space Mono', monospace; font-size: 11.5px;
+  line-height: 1.9; color: var(--txt2); overflow-x: auto; white-space: pre;
+}
+pre.cmd .c-cm   { color: #6a9955; font-style: italic; }
+pre.cmd .c-kw   { color: var(--teal); }
+pre.cmd .c-flag { color: var(--amber); }
+pre.cmd .c-path { color: #ce9178; }
+
+.readme {
+  font-size: 13px; line-height: 1.85; color: var(--txt2);
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 12px;
+  padding: 26px 30px;
+}
+.readme h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: var(--txt); margin: 18px 0 9px; padding-bottom: 7px; border-bottom: 1px solid var(--line); }
+.readme h3:first-child { margin-top: 0; }
+.readme p  { margin-bottom: 9px; }
+.readme ul { padding-left: 18px; margin-bottom: 10px; }
+.readme li { margin-bottom: 4px; }
+.readme code { font-family: 'Space Mono', monospace; font-size: 11px; background: var(--bg4); color: var(--teal); padding: 1px 5px; border-radius: 3px; }
+.readme a  { color: var(--teal); text-decoration: none; }
+.readme a:hover { text-decoration: underline; }
+.readme .note { background: var(--teal-dim); border: 1px solid rgba(0,232,200,.18); border-radius: 7px; padding: 9px 13px; margin: 9px 0; color: var(--teal); font-size: 12px; }
+.readme pre { background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 12px 16px; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--txt2); overflow-x: auto; white-space: pre; margin-bottom: 10px; }
+.readme table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+.readme th { padding: 7px 11px; text-align: left; font-size: 10px; font-weight: 700; color: var(--txt3); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--line); background: var(--bg3); }
+.readme td { padding: 9px 11px; font-size: 11.5px; border-bottom: 1px solid var(--line); font-family: 'Space Mono', monospace; }
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 22px; right: 22px; z-index: 999;
+  background: var(--bg3); border: 1px solid var(--line2); border-radius: 9px;
+  padding: 11px 16px; display: none; align-items: center; gap: 8px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.5); font-size: 13px; max-width: 300px;
+}
+.toast.on { display: flex; animation: tin .22s ease; }
+@keyframes tin { from{transform:translateY(8px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+/* Responsive */
+@media (max-width: 700px) {
+  .tracker-layout { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; max-height: 200px; }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="amb amb-1"></div>
+<div class="amb amb-2"></div>
+<div class="amb amb-3"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="nav-logo" onclick="goPage('home')">ModernSilicon</div>
+  <div class="nav-tabs">
+    <button class="ntab" onclick="goPage('tracker')">📋 Problem Bank</button>
+    <button class="ntab" onclick="goPage('commands')">⚙️ Commands & Setup</button>
+  </div>
+  <div class="nav-r">
+    <div class="prog-pill">
+      <div class="pp-track"><div class="pp-fill" id="ppf" style="width:0%"></div></div>
+      <span class="pp-val" id="ppv">0/0</span>
+      <span style="color:var(--txt3)">solved</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HOME ═══ -->
+<div class="page on" id="page-home">
+  <div class="hero">
+    <div class="hero-badge"><div class="badge-dot"></div>SystemVerilog · DFT · RTL · Comp Arch</div>
+    <h1 class="hero-h">Master<br>Hardware<br><span class="g">Design.</span></h1>
+    <p class="hero-sub">A complete interview prep platform for chip engineers. Track your progress through RTL, DFT, verification, CDC, and computer architecture.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" onclick="goPage('tracker')">Browse Problems →</button>
+      <button class="btn btn-ghost" onclick="goPage('commands')">Setup Guide</button>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-n" id="s-total">—</span><span class="stat-l">Questions</span></div>
+      <div class="stat"><span class="stat-n" id="s-solved">0</span><span class="stat-l">Solved</span></div>
+      <div class="stat"><span class="stat-n" id="s-cats">—</span><span class="stat-l">Categories</span></div>
+      <div class="stat"><span class="stat-n">Free</span><span class="stat-l">Always</span></div>
+    </div>
+
+    <div style="margin-top:58px">
+      <div class="section-label">What's inside</div>
+      <div class="features" id="feat-grid">
+        <!-- Populated from manifest -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TRACKER ═══ -->
+<div class="page" id="page-tracker">
+  <div class="tracker-layout">
+
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-prog">
+        <div class="sp-label"><span>Progress</span><span id="sp-pct">0%</span></div>
+        <div class="sp-track"><div class="sp-fill" id="sp-fill" style="width:0%"></div></div>
+        <div class="sp-nums" id="sp-nums">0 / 0 completed</div>
+      </div>
+
+      <div class="ss-title">Categories</div>
+      <button class="slink on" onclick="filterCat('ALL',this)">
+        All Questions <span class="slink-cnt" id="sc-ALL">0</span>
+      </button>
+      <div id="cat-links"></div>
+
+      <div class="ss-sep"></div>
+      <div class="ss-title">Status</div>
+      <button class="slink" onclick="filterStatus('done',this)">✅ Solved</button>
+      <button class="slink" onclick="filterStatus('todo',this)">⬜ Unsolved</button>
+      <div class="ss-sep"></div>
+      <button class="slink" onclick="resetAll()" style="color:var(--red)">↺ Reset Progress</button>
+    </div>
+
+    <div class="qmain" id="qmain">
+      <div class="qtoolbar">
+        <div class="qsearch">
+          <span style="color:var(--txt3);font-size:14px">⌕</span>
+          <input type="text" id="qsearch-input" placeholder="Search questions, tags..." oninput="renderList()">
+        </div>
+        <div class="qfilter">
+          <button class="ftag on"  onclick="setDiff('all',this)">All</button>
+          <button class="ftag e-f" onclick="setDiff('Easy',this)">Easy</button>
+          <button class="ftag m-f" onclick="setDiff('Medium',this)">Medium</button>
+          <button class="ftag h-f" onclick="setDiff('Hard',this)">Hard</button>
+        </div>
+      </div>
+      <div id="qlist">
+        <!-- Loading skeleton -->
+        <div id="qlist-loading">
+          ${Array(6).fill(0).map(()=>`
+          <div class="loading-row">
+            <div class="loading-bar" style="width:19px;height:19px;border-radius:5px;flex-shrink:0"></div>
+            <div class="loading-bar" style="width:48px"></div>
+            <div class="loading-bar" style="width:60%;flex:1"></div>
+            <div class="loading-bar" style="width:60px"></div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COMMANDS ═══ -->
+<div class="page" id="page-commands">
+  <div class="cmd-layout">
+    <div style="margin-bottom:32px">
+      <div class="section-label">Reference</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:-1px;margin-bottom:7px">Commands & Setup Guide</h2>
+      <p style="color:var(--txt2);font-size:14px">Everything you need to simulate, compile, and debug SystemVerilog.</p>
+    </div>
+
+    <div class="cmd-section">
+      <div class="cmd-section-title"><span>⚡</span> Icarus Verilog (iverilog)</div>
+      <div class="cmd-cards">
+        <div class="cmd-card"><div class="cmd-card-head">Install <button class="copy-btn" onclick="copyTxt('sudo apt install iverilog')">Copy</button></div><div class="cmd-card-body">sudo apt install iverilog<br># macOS: brew install icarus-verilog</div></div>
+        <div class="cmd-card"><div class="cmd-card-head">Compile SV <button class="copy-btn" onclick="copyTxt('iverilog -g2012 -o sim.out design.sv tb.sv')">Copy</button></div><div class="cmd-card-body">iverilog -g2012 -o sim.out design.sv tb.sv</div></div>
+        <div class="cmd-card"><div class="cmd-card-head">Run <button class="copy-btn" onclick="copyTxt('vvp sim.out')">Copy</button></div><div class="cmd-card-body">vvp sim.out</div></div>
+        <div class="cmd-card"><div class="cmd-card-head">Waveform <button class="copy-btn" onclick="copyTxt('gtkwave sim.vcd')">Copy</button></div><div class="cmd-card-body">gtkwave sim.vcd<br># install: sudo apt install gtkwave</div></div>
+      </div>
+<pre class="cmd"><span class="c-cm"># Full compile + simulate + view pipeline</span>
+<span class="c-kw">iverilog</span> <span class="c-flag">-g2012</span> <span class="c-flag">-Wall</span> <span class="c-flag">-o</span> <span class="c-path">sim.out</span> <span class="c-path">solution.sv testbench.sv</span>
+<span class="c-kw">vvp</span> <span class="c-path">sim.out</span>
+<span class="c-kw">gtkwave</span> <span class="c-path">sim.vcd</span>
+
+<span class="c-cm"># Common flags</span>
+<span class="c-flag">-g2012</span>         <span class="c-cm"># Enable SystemVerilog 2012</span>
+<span class="c-flag">-Wall</span>          <span class="c-cm"># Enable all warnings</span>
+<span class="c-flag">-Wno-timescale</span> <span class="c-cm"># Suppress timescale warnings</span>
+<span class="c-flag">-I ./inc</span>       <span class="c-cm"># Add include directory</span></pre>
+    </div>
+
+    <div class="cmd-section">
+      <div class="cmd-section-title"><span>🔬</span> Synopsys VCS</div>
+<pre class="cmd"><span class="c-cm"># Compile (SystemVerilog)</span>
+<span class="c-kw">vcs</span> <span class="c-flag">-sverilog</span> <span class="c-flag">-full64</span> <span class="c-flag">-debug_all</span> <span class="c-path">design.sv tb.sv</span> <span class="c-flag">-o</span> <span class="c-path">simv</span>
+<span class="c-kw">./simv</span>
+
+<span class="c-cm"># With UVM</span>
+<span class="c-kw">vcs</span> <span class="c-flag">-sverilog</span> <span class="c-flag">-ntb_opts</span> uvm-1.2 <span class="c-path">design.sv tb.sv</span>
+
+<span class="c-cm"># Open waveform in DVE</span>
+<span class="c-kw">dve</span> <span class="c-flag">-vpd</span> <span class="c-path">vcdplus.vpd</span> &</pre>
+    </div>
+
+    <div class="cmd-section">
+      <div class="cmd-section-title"><span>🖥️</span> ModelSim / Questa</div>
+<pre class="cmd"><span class="c-cm"># Compile and simulate</span>
+<span class="c-kw">vlib</span> <span class="c-path">work</span>
+<span class="c-kw">vlog</span> <span class="c-flag">-sv</span> <span class="c-path">design.sv testbench.sv</span>
+<span class="c-kw">vsim</span> <span class="c-flag">-c</span> <span class="c-path">tb</span> <span class="c-flag">-do</span> <span class="c-path">"run -all; quit"</span>
+
+<span class="c-cm"># Quick batch run</span>
+<span class="c-kw">vsim</span> <span class="c-flag">-c</span> <span class="c-flag">-do</span> <span class="c-path">"vlib work; vlog -sv *.sv; vsim tb; run -all; quit"</span></pre>
+    </div>
+
+    <div class="cmd-section">
+      <div class="cmd-section-title"><span>📝</span> Testbench Essentials</div>
+<pre class="cmd"><span class="c-cm">// VCD waveform dump</span>
+<span class="c-kw">initial</span> begin
+  $dumpfile(<span class="c-path">"sim.vcd"</span>);
+  $dumpvars(0, tb);       <span class="c-cm">// dump all signals in scope</span>
+end
+
+<span class="c-cm">// Simulation control</span>
+$finish;                   <span class="c-cm">// end simulation</span>
+$stop;                     <span class="c-cm">// pause (interactive)</span>
+#100ns;                    <span class="c-cm">// delay</span>
+@(posedge clk);            <span class="c-cm">// wait for rising edge</span>
+
+<span class="c-cm">// Display</span>
+$display(<span class="c-path">"val=%0d"</span>, val);  <span class="c-cm">// immediate print</span>
+$monitor(<span class="c-path">"t=%0t v=%b"</span>, $time, val); <span class="c-cm">// auto-print on change</span>
+
+<span class="c-cm">// Assertions</span>
+assert(q === 1'b1) else $error(<span class="c-path">"FAIL"</span>);
+$fatal(1, <span class="c-path">"TIMEOUT"</span>);</pre>
+    </div>
+
+    <div class="cmd-section">
+      <div class="cmd-section-title"><span>📂</span> Adding New Questions</div>
+      <div class="readme">
+        <h3>How the File System Works</h3>
+        <p>Questions live in <code>questions/&lt;CATEGORY&gt;/&lt;folder-name&gt;/</code>. Each question folder contains four files:</p>
+        <table>
+          <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>info.txt</td><td>Title, difficulty, tags, related IDs</td></tr>
+            <tr><td>description.txt</td><td>Concept explanation (supports Markdown-style headings)</td></tr>
+            <tr><td>solution.sv</td><td>Reference implementation shown with syntax highlighting</td></tr>
+            <tr><td>testbench.sv</td><td>Testbench to run locally</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Step-by-Step: Add a Question</h3>
+        <pre>
+# 1. Copy the template folder
+cp -r questions/_TEMPLATE questions/RTL/003-my-new-question
+
+# 2. Edit the four files in the new folder
+#    (title, description, solution, testbench)
+
+# 3. Register in manifest.json — add ONE entry:
+#    {
+#      "id": "RTL-003",
+#      "category": "RTL",
+#      "folder": "RTL/003-my-new-question"
+#    }
+
+# 4. Commit and push — that's it!</pre>
+
+        <div class="note">💡 The HTML file never needs to change. All content is loaded dynamically from the file system on every page visit.</div>
+
+        <h3>info.txt Format</h3>
+        <pre>
+title: Your Question Title
+difficulty: Easy        # Easy | Medium | Hard
+tags: tag1, tag2, tag3
+related: RTL-001, DFT-001</pre>
+
+        <h3>description.txt Formatting</h3>
+        <p>Use Markdown-style headings and special callouts:</p>
+        <pre>
+## Section Heading (renders as teal uppercase header)
+### Sub-heading
+
+Regular paragraph text here.
+
+`inline code` renders with teal highlight.
+
+> TIP: Prefix with "> TIP:" for a green callout box.
+> WARNING: Prefix with "> WARNING:" for an amber callout box.
+
+- Bullet list item
+1. Numbered list item</pre>
+
+        <h3>Setup — Ubuntu / Debian</h3>
+        <pre>sudo apt update && sudo apt install -y iverilog gtkwave make git</pre>
+
+        <h3>Setup — macOS</h3>
+        <pre>brew install icarus-verilog gtkwave</pre>
+
+        <h3>Run a Question Locally</h3>
+        <pre>
+cd questions/RTL/001-dff-sync-reset
+iverilog -g2012 -Wall -o sim.out solution.sv testbench.sv
+vvp sim.out
+gtkwave sim.vcd</pre>
+
+        <h3>Online Simulators</h3>
+        <ul>
+          <li><strong>EDA Playground</strong> — <a href="https://www.edaplayground.com" target="_blank">edaplayground.com</a></li>
+          <li><strong>Chip Dev</strong> — <a href="https://chipdev.io" target="_blank">chipdev.io</a></li>
+          <li><strong>Makerchip</strong> — <a href="https://makerchip.com" target="_blank">makerchip.com</a></li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ DRAWER ═══ -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head" id="d-head"></div>
+  <div class="dtabs">
+    <button class="dtab on"  data-tab="concept">Question</button>
+    <button class="dtab"     data-tab="solution">Solution</button>
+    <button class="dtab"     data-tab="testbench">Testbench</button>
+    <button class="dtab"     data-tab="related">Related</button>
+  </div>
+  <div class="dtab-content on" id="dtc-concept"></div>
+  <div class="dtab-content"    id="dtc-solution"></div>
+  <div class="dtab-content"    id="dtc-testbench"></div>
+  <div class="dtab-content"    id="dtc-related"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="t-icon"></span><span id="t-msg"></span>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   CONFIGURATION
+   Change this path if you rename the manifest
+═══════════════════════════════════════════ */
+const MANIFEST_PATH = 'questions/manifest.json';
+const Q_BASE        = 'questions/';
+const DONE_KEY      = 'ms_done_v2';
+
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let manifest   = null;   // raw manifest JSON
+let questions  = [];     // array of question objects (after info.txt parsed)
+let categories = {};     // keyed by id
+let doneSet    = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || '[]'));
+
+let activeCat    = 'ALL';
+let activeDiff   = 'all';
+let activeStatus = 'all';
+let openQ        = null;
+
+/* ═══════════════════════════════════════════
+   BOOT — load manifest, then fetch all info.txt files
+═══════════════════════════════════════════ */
+async function boot() {
+  try {
+    const r = await fetch(MANIFEST_PATH + '?v=' + Date.now());
+    if (!r.ok) throw new Error('manifest.json not found at ' + MANIFEST_PATH);
+    manifest = await r.json();
+
+    // Build category lookup
+    manifest.categories.forEach(c => categories[c.id] = c);
+
+    // Fetch all info.txt files in parallel
+    const infos = await Promise.all(
+      manifest.questions.map(q => fetchInfo(q))
+    );
+    questions = infos.filter(Boolean);
+
+    buildUI();
+    renderList();
+    updateProgress();
+
+  } catch(e) {
+    console.error(e);
+    showError(`Failed to load manifest: ${e.message}<br>
+      Make sure <code>questions/manifest.json</code> exists and this page
+      is served over HTTP (not opened as a local file).`);
+  }
+}
+
+async function fetchInfo(qMeta) {
+  try {
+    const url = Q_BASE + qMeta.folder + '/info.txt';
+    const r   = await fetch(url + '?v=' + Date.now());
+    if (!r.ok) throw new Error('info.txt missing: ' + url);
+    const txt = await r.text();
+    return { ...qMeta, ...parseInfo(txt), _loaded: false };
+  } catch(e) {
+    console.warn(e.message);
+    return null;
+  }
+}
+
+function parseInfo(txt) {
+  const out = {};
+  txt.split('\n').forEach(line => {
+    const i = line.indexOf(':');
+    if (i < 0) return;
+    const k = line.slice(0, i).trim().toLowerCase();
+    const v = line.slice(i + 1).trim();
+    if (k === 'tags')    out.tags    = v.split(',').map(s => s.trim()).filter(Boolean);
+    else if (k === 'related') out.related = v.split(',').map(s => s.trim()).filter(Boolean);
+    else out[k] = v;
+  });
+  out.difficulty = out.difficulty || 'Medium';
+  out.tags       = out.tags       || [];
+  out.related    = out.related    || [];
+  return out;
+}
+
+/* ═══════════════════════════════════════════
+   BUILD SIDEBAR + HOME
+═══════════════════════════════════════════ */
+function buildUI() {
+  // Sidebar category links
+  const catLinks = document.getElementById('cat-links');
+  catLinks.innerHTML = manifest.categories.map(c => `
+    <button class="slink" onclick="filterCat('${c.id}',this)">
+      <span class="cat-dot" style="background:${c.color}"></span>
+      ${c.label}
+      <span class="slink-cnt" id="sc-${c.id}">
+        ${questions.filter(q => q.category === c.id).length}
+      </span>
+    </button>
+  `).join('');
+
+  // Update ALL count
+  document.getElementById('sc-ALL').textContent = questions.length;
+
+  // Home stats
+  document.getElementById('s-total').textContent = questions.length;
+  document.getElementById('s-cats').textContent  = manifest.categories.length;
+
+  // Home feature cards
+  const grid = document.getElementById('feat-grid');
+  grid.innerHTML = manifest.categories.map(c => `
+    <div class="feat-card" onclick="filterCat('${c.id}'); goPage('tracker')">
+      <div class="feat-icon">${c.icon}</div>
+      <h3 class="feat-h">${c.label}</h3>
+      <p class="feat-p">${c.description}</p>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════ */
+function goPage(pg) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(b => b.classList.remove('on'));
+  document.getElementById('page-' + pg).classList.add('on');
+  document.querySelectorAll('.ntab').forEach(b => {
+    if ((pg === 'tracker'  && b.textContent.includes('Problem')) ||
+        (pg === 'commands' && b.textContent.includes('Commands')))
+      b.classList.add('on');
+  });
+  if (pg === 'tracker') renderList();
+}
+
+/* ═══════════════════════════════════════════
+   FILTERS
+═══════════════════════════════════════════ */
+function filterCat(cat, btn) {
+  activeCat    = cat;
+  activeStatus = 'all';
+  document.querySelectorAll('.slink').forEach(b => b.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  else {
+    // Called programmatically — activate correct btn
+    const all = document.querySelectorAll('.slink');
+    all.forEach(b => { if (b.textContent.trim().startsWith('All')) b.classList.add('on'); });
+  }
+  renderList();
+}
+
+function filterStatus(st, btn) {
+  activeStatus = st;
+  activeCat    = 'ALL';
+  document.querySelectorAll('.slink').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderList();
+}
+
+function setDiff(d, btn) {
+  activeDiff = d;
+  document.querySelectorAll('.ftag').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderList();
+}
+
+/* ═══════════════════════════════════════════
+   RENDER QUESTION LIST
+═══════════════════════════════════════════ */
+const CAT_ICONS = {};  // populated from manifest
+
+function renderList() {
+  if (!manifest) return;
+
+  const search = (document.getElementById('qsearch-input')?.value || '').toLowerCase();
+
+  // Group questions by category in manifest order
+  const grouped = {};
+  manifest.categories.forEach(c => grouped[c.id] = []);
+
+  questions.forEach(q => {
+    if (!grouped[q.category]) return;
+
+    // Filter: category
+    if (activeCat !== 'ALL' && q.category !== activeCat) return;
+    // Filter: difficulty
+    if (activeDiff !== 'all' && q.difficulty !== activeDiff) return;
+    // Filter: status
+    if (activeStatus === 'done' && !doneSet.has(q.id)) return;
+    if (activeStatus === 'todo' &&  doneSet.has(q.id)) return;
+    // Filter: search
+    if (search) {
+      const hay = (q.title + ' ' + (q.tags||[]).join(' ')).toLowerCase();
+      if (!hay.includes(search)) return;
+    }
+    grouped[q.category].push(q);
+  });
+
+  let html = '';
+  manifest.categories.forEach(cat => {
+    const qs = grouped[cat.id];
+    if (!qs || !qs.length) return;
+    const done = qs.filter(q => doneSet.has(q.id)).length;
+    const pct  = Math.round(done / qs.length * 100);
+
+    html += `
+      <div class="cat-hdr">
+        <div class="cat-icon">${cat.icon}</div>
+        <span>${cat.label}</span>
+        <div class="cat-prog-mini">
+          <span>${done}/${qs.length}</span>
+          <div class="cpm-bar">
+            <div class="cpm-fill" style="width:${pct}%;background:${cat.color}"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    html += qs.map(q => {
+      const isDone = doneSet.has(q.id);
+      const dc     = q.difficulty === 'Easy' ? 'e' : q.difficulty === 'Hard' ? 'h' : 'm';
+      const tags   = (q.tags || []).slice(0, 2).map(t => `<span class="qtag">${t}</span>`).join('');
+      return `
+        <div class="qrow ${isDone ? 'done' : ''}" id="qrow-${q.id}" onclick="openQuestion('${q.id}')">
+          <div class="qchk" onclick="event.stopPropagation();toggleDone('${q.id}')">
+            ${isDone ? '✓' : ''}
+          </div>
+          <div class="q-id">${q.id}</div>
+          <div class="q-title">${q.title || q.id}</div>
+          <div class="q-tags">${tags}</div>
+          <span class="diff-badge ${dc}">${q.difficulty}</span>
+          <button class="q-arrow" title="View detail">›</button>
+        </div>
+      `;
+    }).join('');
+
+    html += '<div style="height:16px"></div>';
+  });
+
+  if (!html) {
+    html = `<div class="empty-state">
+      <div class="e-icon">🔎</div>
+      <p>No questions match your filter.</p>
+    </div>`;
+  }
+
+  const qlist = document.getElementById('qlist');
+  qlist.innerHTML = html;
+  updateProgress();
+}
+
+/* ═══════════════════════════════════════════
+   PROGRESS
+═══════════════════════════════════════════ */
+function updateProgress() {
+  const total  = questions.length;
+  const solved = questions.filter(q => doneSet.has(q.id)).length;
+  const pct    = total ? Math.round(solved / total * 100) : 0;
+
+  document.getElementById('ppf').style.width    = pct + '%';
+  document.getElementById('ppv').textContent    = `${solved}/${total}`;
+  document.getElementById('s-solved').textContent = solved;
+
+  const sf = document.getElementById('sp-fill');
+  if (sf) {
+    sf.style.width = pct + '%';
+    document.getElementById('sp-pct').textContent  = pct + '%';
+    document.getElementById('sp-nums').textContent = `${solved} / ${total} completed`;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   TOGGLE DONE
+═══════════════════════════════════════════ */
+function toggleDone(id) {
+  if (doneSet.has(id)) { doneSet.delete(id); showToast('Marked unsolved', '⬜'); }
+  else                  { doneSet.add(id);    showToast('Marked solved! 🎉', '✅'); }
+  localStorage.setItem(DONE_KEY, JSON.stringify([...doneSet]));
+
+  const row = document.getElementById('qrow-' + id);
+  if (row) {
+    row.classList.toggle('done', doneSet.has(id));
+    row.querySelector('.qchk').textContent = doneSet.has(id) ? '✓' : '';
+  }
+  updateProgress();
+
+  // Update drawer header button if open
+  if (openQ && openQ.id === id) refreshDrawerBtn(id);
+}
+
+function resetAll() {
+  if (!confirm('Reset all progress? This cannot be undone.')) return;
+  doneSet.clear();
+  localStorage.setItem(DONE_KEY, JSON.stringify([]));
+  renderList();
+  showToast('Progress reset', '↺');
+}
+
+/* ═══════════════════════════════════════════
+   DRAWER — open question
+═══════════════════════════════════════════ */
+async function openQuestion(id) {
+  const q = questions.find(x => x.id === id);
+  if (!q) return;
+  openQ = q;
+
+  const cat  = categories[q.category] || {};
+  const dc   = q.difficulty === 'Easy' ? 'e' : q.difficulty === 'Hard' ? 'h' : 'm';
+  const isDone = doneSet.has(q.id);
+
+  // Header
+  document.getElementById('d-head').innerHTML = `
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px">
+        <span style="font-size:16px">${cat.icon || ''}</span>
+        <span class="diff-badge ${dc}">${q.difficulty}</span>
+        <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--txt3)">${cat.label || q.category} · ${q.id}</span>
+      </div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.3px;margin-bottom:9px">${q.title || q.id}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${(q.tags||[]).map(t=>`<span class="qtag">${t}</span>`).join('')}
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:7px;flex-shrink:0">
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+      <button id="d-done-btn"
+        onclick="toggleDone('${q.id}')"
+        style="padding:5px 11px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;
+               border:1px solid ${isDone?'rgba(251,113,133,.3)':'rgba(34,211,160,.3)'};
+               background:${isDone?'var(--red-dim)':'var(--green-dim)'};
+               color:${isDone?'var(--red)':'var(--green)'};
+               font-family:inherit;transition:all .15s">
+        ${isDone ? '↩ Unmark' : '✓ Mark Done'}
+      </button>
+    </div>
+  `;
+
+  // Reset tabs
+  document.querySelectorAll('.dtab').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.dtab-content').forEach(c => c.classList.remove('on'));
+  document.querySelector('.dtab[data-tab="concept"]').classList.add('on');
+  document.getElementById('dtc-concept').classList.add('on');
+
+  // Clear other tabs
+  ['dtc-solution','dtc-testbench','dtc-related'].forEach(id => {
+    document.getElementById(id).innerHTML = '<div style="color:var(--txt3);font-size:12px;padding:10px 0">Loading…</div>';
+  });
+
+  // Open overlay
+  document.getElementById('overlay').classList.add('on');
+  document.getElementById('drawer').classList.add('on');
+
+  // Fetch concept (description.txt)
+  fetchAndRenderConcept(q);
+
+  // Fetch code files lazily
+  fetchAndRenderCode(q, 'solution',   'dtc-solution');
+  fetchAndRenderCode(q, 'testbench',  'dtc-testbench');
+  renderRelated(q);
+}
+
+function refreshDrawerBtn(id) {
+  const btn = document.getElementById('d-done-btn');
+  if (!btn) return;
+  const isDone = doneSet.has(id);
+  btn.style.border      = `1px solid ${isDone?'rgba(251,113,133,.3)':'rgba(34,211,160,.3)'}`;
+  btn.style.background  = isDone ? 'var(--red-dim)' : 'var(--green-dim)';
+  btn.style.color       = isDone ? 'var(--red)'     : 'var(--green)';
+  btn.textContent       = isDone ? '↩ Unmark' : '✓ Mark Done';
+}
+
+async function fetchAndRenderConcept(q) {
+  try {
+    const url = Q_BASE + q.folder + '/description.txt?v=' + Date.now();
+    const r   = await fetch(url);
+    const txt = r.ok ? await r.text() : '_(No description found)_';
+    document.getElementById('dtc-concept').innerHTML =
+      `<div class="concept-body">${markdownLite(txt)}</div>`;
+  } catch(e) {
+    document.getElementById('dtc-concept').innerHTML =
+      `<div class="error-state">Could not load description.txt</div>`;
+  }
+}
+
+async function fetchAndRenderCode(q, fileType, targetId) {
+  const el  = document.getElementById(targetId);
+  const ext = fileType === 'solution' ? 'sv' : 'sv';
+  const url = Q_BASE + q.folder + '/' + fileType + '.sv?v=' + Date.now();
+  try {
+    const r   = await fetch(url);
+    if (!r.ok) throw new Error('File not found');
+    const txt = await r.text();
+    const label = fileType === 'solution' ? 'solution.sv' : 'testbench.sv';
+
+    el.innerHTML = `
+      <button class="ans-toggle" onclick="toggleAns(this)">
+        <span class="tri">▶</span>
+        ${fileType === 'solution' ? 'Show Solution Code' : 'Show Testbench'}
+      </button>
+      <div class="ans-hidden">
+        <div class="code-toolbar">
+          <span>${label}</span>
+          <button class="code-copy" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-block">${syntaxHL(txt)}</div>
+      </div>
+      <div style="margin-top:14px;font-size:11.5px;color:var(--txt3)">
+        💡 Try writing it yourself first. Run with:<br>
+        <code style="font-family:'Space Mono',monospace;font-size:10.5px;background:var(--bg4);color:var(--teal);padding:2px 6px;border-radius:3px;display:inline-block;margin-top:5px">
+          iverilog -g2012 -o sim.out solution.sv testbench.sv && vvp sim.out
+        </code>
+      </div>
+    `;
+    // Store raw text for copy
+    el.querySelector('.code-block').dataset.raw = txt;
+  } catch(e) {
+    el.innerHTML = `<div style="color:var(--txt3);font-size:12px;padding:4px 0">File not available.</div>`;
+  }
+}
+
+function toggleAns(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('on');
+}
+
+function copyCode(btn) {
+  const raw = btn.closest('.ans-hidden')?.querySelector('.code-block')?.dataset.raw || '';
+  navigator.clipboard.writeText(raw).then(() => showToast('Code copied!', '⎘'));
+}
+
+function renderRelated(q) {
+  const el = document.getElementById('dtc-related');
+  if (!q.related || !q.related.length) {
+    el.innerHTML = '<p style="color:var(--txt3);font-size:13px">No related questions.</p>';
+    return;
+  }
+  const rows = q.related.map(rid => {
+    const r = questions.find(x => x.id === rid);
+    if (!r) return '';
+    const c = categories[r.category] || {};
+    const dc = r.difficulty === 'Easy' ? 'e' : r.difficulty === 'Hard' ? 'h' : 'm';
+    return `<div class="qrow" onclick="openQuestion('${r.id}')" style="margin-bottom:7px">
+      <span style="font-size:16px">${c.icon||''}</span>
+      <div class="q-id" style="width:60px">${r.id}</div>
+      <div class="q-title">${r.title||r.id}</div>
+      <span class="diff-badge ${dc}">${r.difficulty}</span>
+    </div>`;
+  }).join('');
+  el.innerHTML = rows || '<p style="color:var(--txt3);font-size:13px">No related questions found.</p>';
+}
+
+function closeDrawer() {
+  document.getElementById('overlay').classList.remove('on');
+  document.getElementById('drawer').classList.remove('on');
+  openQ = null;
+}
+
+// Tab switching
+document.addEventListener('click', e => {
+  const tab = e.target.closest('.dtab');
+  if (!tab) return;
+  document.querySelectorAll('.dtab').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.dtab-content').forEach(c => c.classList.remove('on'));
+  tab.classList.add('on');
+  document.getElementById('dtc-' + tab.dataset.tab).classList.add('on');
+});
+
+/* ═══════════════════════════════════════════
+   LIGHTWEIGHT MARKDOWN RENDERER
+═══════════════════════════════════════════ */
+function markdownLite(raw) {
+  // Escape HTML first
+  let s = raw
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Blockquote callouts (> TIP: / > WARNING:)
+  s = s.replace(/^&gt;\s*TIP:\s*(.+)$/gm,
+    '<div class="tip">💡 $1</div>');
+  s = s.replace(/^&gt;\s*WARNING:\s*(.+)$/gm,
+    '<div class="warn">⚠️ $1</div>');
+  s = s.replace(/^&gt;\s*(.+)$/gm,
+    '<div class="tip">$1</div>');
+
+  // Fenced code blocks (``` ... ```)
+  s = s.replace(/```[\s\S]*?```/g, m => {
+    const inner = m.slice(3, m.lastIndexOf('```')).replace(/^[a-z]*\n/, '');
+    return `<pre>${inner}</pre>`;
+  });
+
+  // Headings
+  s = s.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  s = s.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+
+  // Bold
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+  // Inline code
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // Bullet lists
+  s = s.replace(/((?:^- .+\n?)+)/gm, match => {
+    const items = match.trim().split('\n').map(l =>
+      `<li>${l.replace(/^- /, '')}</li>`).join('');
+    return `<ul>${items}</ul>`;
+  });
+
+  // Numbered lists
+  s = s.replace(/((?:^\d+\. .+\n?)+)/gm, match => {
+    const items = match.trim().split('\n').map(l =>
+      `<li>${l.replace(/^\d+\. /, '')}</li>`).join('');
+    return `<ol>${items}</ol>`;
+  });
+
+  // Paragraphs (blank line separated blocks)
+  s = s.split(/\n{2,}/).map(block => {
+    block = block.trim();
+    if (!block) return '';
+    if (/^<(h[23]|ul|ol|pre|div)/.test(block)) return block;
+    return `<p>${block.replace(/\n/g, ' ')}</p>`;
+  }).join('\n');
+
+  return s;
+}
+
+function syntaxHL(code) {
+  const KWS = [
+    'module','endmodule','input','output','inout','logic','wire','reg',
+    'always_ff','always_comb','always_latch','always','initial','begin','end',
+    'if','else','case','casez','endcase','default','for','while','repeat',
+    'function','endfunction','task','endtask','typedef','enum','struct',
+    'parameter','localparam','assign','posedge','negedge',
+    'generate','endgenerate','genvar','return'
+  ];
+
+  // 1️⃣ Escape HTML FIRST
+  let out = code
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // 2️⃣ Extract comments temporarily (prevents nested corruption)
+  const comments = [];
+  out = out.replace(/\/\/[^\n]*/g, m => {
+    comments.push(m);
+    return `___COMMENT_${comments.length - 1}___`;
+  });
+
+  // 3️⃣ Strings
+  out = out.replace(/("(?:[^"\\]|\\.)*")/g, '<span class="st">$1</span>');
+
+  // 4️⃣ SV number literals (1'b0 etc)
+  out = out.replace(/\b(\d+'[sbBhHoOdD][0-9a-fA-FxXzZ_?]+)\b/g,
+    '<span class="nm">$1</span>');
+
+  // 5️⃣ Plain integers
+  out = out.replace(/\b(\d+)\b/g,
+    '<span class="nm">$1</span>');
+
+  // 6️⃣ System tasks ($display etc)
+  out = out.replace(/(\$[a-zA-Z_]\w*)/g,
+    '<span class="sy">$1</span>');
+
+  // 7️⃣ Keywords (safe because comments removed)
+  KWS.forEach(kw => {
+    const re = new RegExp(`\\b${kw}\\b`, 'g');
+    out = out.replace(re, `<span class="kw">${kw}</span>`);
+  });
+
+  // 8️⃣ Restore comments LAST
+  out = out.replace(/___COMMENT_(\d+)___/g, (_, i) =>
+    `<span class="cm">${comments[i]}</span>`
+  );
+
+  return out;
+}
+
+/* ═══════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════ */
+function copyTxt(txt) {
+  navigator.clipboard.writeText(txt).then(() => showToast('Copied!', '⎘'));
+}
+
+let _toastTimer;
+function showToast(msg, icon = 'ℹ️') {
+  const el = document.getElementById('toast');
+  document.getElementById('t-icon').textContent = icon;
+  document.getElementById('t-msg').textContent  = msg;
+  el.classList.add('on');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('on'), 2800);
+}
+
+function showError(msg) {
+  const qlist = document.getElementById('qlist');
+  if (qlist) qlist.innerHTML = `<div class="error-state">⚠️ ${msg}</div>`;
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', boot);
+</script>
+</body>
+</html>

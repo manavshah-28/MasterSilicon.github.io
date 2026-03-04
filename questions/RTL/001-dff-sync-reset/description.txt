@@ -1,0 +1,23 @@
+## Write constraints to randomize bit[7:0] array1[10] with unique values which also multiple of 3
+
+
+A D flip-flop (DFF) captures the value of its input `d` on the rising edge of the clock and holds it until the next rising edge. It is the fundamental storage element in all synchronous digital design.
+
+## Synchronous vs Asynchronous Reset
+
+**Synchronous reset:** The reset only takes effect on the active clock edge. If `rst=1` on a rising edge, `q` goes to 0 on that edge. Reset is just another condition evaluated at the clock edge.
+
+**Asynchronous reset:** The reset takes effect immediately, regardless of the clock. Modeled with `negedge rst_n` in the sensitivity list.
+
+> TIP: Always use `always_ff` for flip-flops in SystemVerilog. It enforces that only non-blocking assignments (`<=`) are used and helps synthesis tools identify sequential logic.
+
+## Key Rule: Non-Blocking Assignments
+
+Inside `always_ff`, always use `<=` (non-blocking). This models the behavior where all right-hand sides are evaluated before any assignments take effect — simulating real flip-flop behavior where inputs are captured simultaneously.
+
+## Interview Focus Points
+
+- Can you draw the circuit schematic of a DFF?
+- What happens if you use blocking `=` inside `always_ff`?
+- How does synchronous reset differ from asynchronous reset in synthesized hardware?
+- What is the critical path through a DFF with combinational logic?

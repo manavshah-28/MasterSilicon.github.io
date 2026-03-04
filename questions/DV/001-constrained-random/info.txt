@@ -1,0 +1,5 @@
+title: Randomize to create unique values which are multiples of 3 
+
+difficulty: Easy
+tags: randomize, constraints 
+related: 

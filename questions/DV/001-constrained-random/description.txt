@@ -1,0 +1,5 @@
+## Write constraints to randomize bit[7:0] arr[10] with unique values which also multiple of 3
+
+> TIP: use `unique{arr};` within constraint
+
+> TIP: Always use `always_ff` for flip-flops in SystemVerilog. It enforces that only non-blocking assignments (`<=`) are used and helps synthesis tools identify sequential logic.

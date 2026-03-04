@@ -1,0 +1,4 @@
+title: D Flip-Flop with Synchronous Reset
+difficulty: Easy
+tags: always_ff, sequential, flip-flop, synchronous-reset
+related: RTL-002, DFT-001

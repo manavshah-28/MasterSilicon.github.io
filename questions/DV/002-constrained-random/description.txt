@@ -1,0 +1,4 @@
+## Write a constraint to randmoly genrate 10 unquie numbers between 99 to 100 ( must be a real numbers )
+
+> TIP: create larger numbers and divide
+

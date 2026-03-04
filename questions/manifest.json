@@ -1,0 +1,88 @@
+{
+  "categories": [
+    {
+      "id": "RTL",
+      "label": "RTL Design",
+      "icon": "🔲",
+      "color": "#00e8c8",
+      "description": "Flip-flops, FSMs, counters, FIFOs, arbiters"
+    },
+    {
+      "id": "DFT",
+      "label": "DFT & Test",
+      "icon": "🔍",
+      "color": "#fbbf24",
+      "description": "Scan chains, ATPG, JTAG, BIST"
+    },
+    {
+      "id": "DV",
+      "label": "Verification",
+      "icon": "🧪",
+      "color": "#a78bfa",
+      "description": "Assertions, coverage, randomization, UVM"
+    },
+    {
+      "id": "CDC",
+      "label": "CDC & Async",
+      "icon": "🔄",
+      "color": "#38bdf8",
+      "description": "Clock domain crossing, synchronizers"
+    },
+    {
+      "id": "ARCH",
+      "label": "Comp Arch",
+      "icon": "💻",
+      "color": "#fb7185",
+      "description": "Pipelines, caches, branch prediction"
+    },
+    {
+      "id": "STA",
+      "label": "Timing / STA",
+      "icon": "⏱️",
+      "color": "#22d3a0",
+      "description": "Setup/hold, skew, multicycle paths"
+    }
+  ],
+  "questions": [
+    {
+      "id": "RTL-001",
+      "category": "RTL",
+      "folder": "RTL/001-dff-sync-reset"
+    },
+    {
+      "id": "RTL-002",
+      "category": "RTL",
+      "folder": "RTL/002-fsm-sequence-detector"
+    },
+    {
+      "id": "DFT-001",
+      "category": "DFT",
+      "folder": "DFT/001-scan-ff"
+    },
+    {
+      "id": "DV-001",
+      "category": "DV",
+      "folder": "DV/001-constrained-random"
+    },
+    {
+      "id": "DV-002",
+      "category": "DV",
+      "folder": "DV/002-constrained-random"
+    },
+    {
+      "id": "CDC-001",
+      "category": "CDC",
+      "folder": "CDC/001-two-ff-synchronizer"
+    },
+    {
+      "id": "ARCH-001",
+      "category": "ARCH",
+      "folder": "ARCH/001-pipeline-hazards"
+    },
+    {
+      "id": "STA-001",
+      "category": "STA",
+      "folder": "STA/001-setup-hold"
+    }
+  ]
+}
