@@ -55,6 +55,11 @@
       "folder": "RTL/002-R2W1-Regfile"
     },
     {
+      "id": "RTL-003",
+      "category": "RTL",
+      "folder": "RTL/003-graycodes"
+    },
+    {
       "id": "DFT-001",
       "category": "DFT",
       "folder": "DFT/001-scan-ff"
@@ -138,6 +143,11 @@
       "id": "DV-016",
       "category": "DV",
       "folder": "DV/016-constrained-random"
+    },
+    {
+      "id": "DV-017",
+      "category": "DV",
+      "folder": "DV/017-constrained-random"
     },
     {
       "id": "CDC-001",

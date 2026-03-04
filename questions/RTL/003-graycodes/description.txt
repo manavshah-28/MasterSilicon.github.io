@@ -1,0 +1,13 @@
+## Design modules for converting binary to gray code and gray to binary
+
+### Decimal, Binary and Gray equivalents
+- Decimal: 000 Binary: 000 Gray: 000 
+- Decimal: 001 Binary: 001 Gray: 001
+- Decimal: 002 Binary: 010 Gray: 011
+- Decimal: 003 Binary: 011 Gray: 010
+- Decimal: 004 Binary: 100 Gray: 110
+- Decimal: 005 Binary: 101 Gray: 111
+- Decimal: 006 Binary: 110 Gray: 101
+- Decimal: 007 Binary: 111 Gray: 100
+
+> TIP: 

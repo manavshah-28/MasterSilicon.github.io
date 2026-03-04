@@ -1,4 +1,4 @@
-## Question
+## Write code to randomize "rand bit [31:0] rand_var" such that sum of the digits of the decimal representation of rand_var should be equal to 17 ( eg: 1673, 773, 98, 11186 and so on )
 
 > TIP: 
 
