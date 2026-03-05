@@ -80,6 +80,36 @@
       "folder": "RTL/007-bubble-sort"
     },
     {
+      "id": "RTL-008",
+      "category": "RTL",
+      "folder": "RTL/008-trailing-zeros"
+    },
+    {
+      "id": "RTL-009",
+      "category": "RTL",
+      "folder": "RTL/009-one-hot-detector"
+    },
+    {
+      "id": "RTL-010",
+      "category": "RTL",
+      "folder": "RTL/010-stopwatch-timer"
+    },
+    {
+      "id": "RTL-011",
+      "category": "RTL",
+      "folder": "RTL/011-sequence-detector"
+    },
+    {
+      "id": "RTL-012",
+      "category": "RTL",
+      "folder": "RTL/012-palindrome-detector"
+    },
+    {
+      "id": "RTL-013",
+      "category": "RTL",
+      "folder": "RTL/013-clock-divider"
+    },
+    {
       "id": "DFT-001",
       "category": "DFT",
       "folder": "DFT/001-scan-ff"
