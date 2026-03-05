@@ -978,47 +978,14 @@ pre.cmd .c-path { color: #ce9178; }
     </div>
 
     <div class="cmd-section">
-      <div class="cmd-section-title"><span>⚡</span> Icarus Verilog (iverilog)</div>
+      <div class="cmd-section-title"><span>⚡</span> QuestaSim</div>
       <div class="cmd-cards">
-        <div class="cmd-card"><div class="cmd-card-head">Install <button class="copy-btn" onclick="copyTxt('sudo apt install iverilog')">Copy</button></div><div class="cmd-card-body">sudo apt install iverilog<br># macOS: brew install icarus-verilog</div></div>
-        <div class="cmd-card"><div class="cmd-card-head">Compile SV <button class="copy-btn" onclick="copyTxt('iverilog -g2012 -o sim.out design.sv tb.sv')">Copy</button></div><div class="cmd-card-body">iverilog -g2012 -o sim.out design.sv tb.sv</div></div>
-        <div class="cmd-card"><div class="cmd-card-head">Run <button class="copy-btn" onclick="copyTxt('vvp sim.out')">Copy</button></div><div class="cmd-card-body">vvp sim.out</div></div>
-        <div class="cmd-card"><div class="cmd-card-head">Waveform <button class="copy-btn" onclick="copyTxt('gtkwave sim.vcd')">Copy</button></div><div class="cmd-card-body">gtkwave sim.vcd<br># install: sudo apt install gtkwave</div></div>
+        <!-- <div class="cmd-card"><div class="cmd-card-head">Install <button class="copy-btn" onclick="copyTxt('sudo apt install iverilog')">Copy</button></div><div class="cmd-card-body">sudo apt install iverilog<br># macOS: brew install icarus-verilog</div></div> -->
+        <div class="cmd-card"><div class="cmd-card-head">Compile SV <button class="copy-btn" onclick="copyTxt('vlog -sv <name_of_sv_file>.sv')">Copy</button></div><div class="cmd-card-body">vlog -sv name_of_sv_file.sv</div></div>
+        <div class="cmd-card"><div class="cmd-card-head">Run <button class="copy-btn" onclick="copyTxt('vsim -c work.&lt;name of tb&gt; -do &quot;run -all; quit&quot;')">Copy</button></div><div class="cmd-card-body">vsim -c work.&lt;name of tb&gt; -do "run -all; quit"</div></div>
+        <div class="cmd-card"><div class="cmd-card-head">Waveform <button class="copy-btn" onclick="copyTxt('vsim -voptargs=+acc work.&lt;name_of_testbench&gt;')">Copy</button></div><div class="cmd-card-body">vsim -voptargs=+acc work.&lt;name_of_testbench&gt;</div></div>
       </div>
-<pre class="cmd"><span class="c-cm"># Full compile + simulate + view pipeline</span>
-<span class="c-kw">iverilog</span> <span class="c-flag">-g2012</span> <span class="c-flag">-Wall</span> <span class="c-flag">-o</span> <span class="c-path">sim.out</span> <span class="c-path">solution.sv testbench.sv</span>
-<span class="c-kw">vvp</span> <span class="c-path">sim.out</span>
-<span class="c-kw">gtkwave</span> <span class="c-path">sim.vcd</span>
 
-<span class="c-cm"># Common flags</span>
-<span class="c-flag">-g2012</span>         <span class="c-cm"># Enable SystemVerilog 2012</span>
-<span class="c-flag">-Wall</span>          <span class="c-cm"># Enable all warnings</span>
-<span class="c-flag">-Wno-timescale</span> <span class="c-cm"># Suppress timescale warnings</span>
-<span class="c-flag">-I ./inc</span>       <span class="c-cm"># Add include directory</span></pre>
-    </div>
-
-    <div class="cmd-section">
-      <div class="cmd-section-title"><span>🔬</span> Synopsys VCS</div>
-<pre class="cmd"><span class="c-cm"># Compile (SystemVerilog)</span>
-<span class="c-kw">vcs</span> <span class="c-flag">-sverilog</span> <span class="c-flag">-full64</span> <span class="c-flag">-debug_all</span> <span class="c-path">design.sv tb.sv</span> <span class="c-flag">-o</span> <span class="c-path">simv</span>
-<span class="c-kw">./simv</span>
-
-<span class="c-cm"># With UVM</span>
-<span class="c-kw">vcs</span> <span class="c-flag">-sverilog</span> <span class="c-flag">-ntb_opts</span> uvm-1.2 <span class="c-path">design.sv tb.sv</span>
-
-<span class="c-cm"># Open waveform in DVE</span>
-<span class="c-kw">dve</span> <span class="c-flag">-vpd</span> <span class="c-path">vcdplus.vpd</span> &</pre>
-    </div>
-
-    <div class="cmd-section">
-      <div class="cmd-section-title"><span>🖥️</span> ModelSim / Questa</div>
-<pre class="cmd"><span class="c-cm"># Compile and simulate</span>
-<span class="c-kw">vlib</span> <span class="c-path">work</span>
-<span class="c-kw">vlog</span> <span class="c-flag">-sv</span> <span class="c-path">design.sv testbench.sv</span>
-<span class="c-kw">vsim</span> <span class="c-flag">-c</span> <span class="c-path">tb</span> <span class="c-flag">-do</span> <span class="c-path">"run -all; quit"</span>
-
-<span class="c-cm"># Quick batch run</span>
-<span class="c-kw">vsim</span> <span class="c-flag">-c</span> <span class="c-flag">-do</span> <span class="c-path">"vlib work; vlog -sv *.sv; vsim tb; run -all; quit"</span></pre>
     </div>
 
     <div class="cmd-section">
@@ -1045,7 +1012,7 @@ $fatal(1, <span class="c-path">"TIMEOUT"</span>);</pre>
     </div>
 
     <div class="cmd-section">
-      <div class="cmd-section-title"><span>📂</span> Adding New Questions</div>
+      <div class="cmd-section-title"><span>📂</span> Contribute to ModernSilicon : Adding New Questions</div>
       <div class="readme">
         <h3>How the File System Works</h3>
         <p>Questions live in <code>questions/&lt;CATEGORY&gt;/&lt;folder-name&gt;/</code>. Each question folder contains four files:</p>
@@ -1101,24 +1068,11 @@ Regular paragraph text here.
 - Bullet list item
 1. Numbered list item</pre>
 
-        <h3>Setup — Ubuntu / Debian</h3>
-        <pre>sudo apt update && sudo apt install -y iverilog gtkwave make git</pre>
-
-        <h3>Setup — macOS</h3>
-        <pre>brew install icarus-verilog gtkwave</pre>
-
-        <h3>Run a Question Locally</h3>
-        <pre>
-cd questions/RTL/001-dff-sync-reset
-iverilog -g2012 -Wall -o sim.out solution.sv testbench.sv
-vvp sim.out
-gtkwave sim.vcd</pre>
-
-        <h3>Online Simulators</h3>
+        <h3>Online Simulators and References</h3>
         <ul>
           <li><strong>EDA Playground</strong> — <a href="https://www.edaplayground.com" target="_blank">edaplayground.com</a></li>
           <li><strong>Chip Dev</strong> — <a href="https://chipdev.io" target="_blank">chipdev.io</a></li>
-          <li><strong>Makerchip</strong> — <a href="https://makerchip.com" target="_blank">makerchip.com</a></li>
+          <li><strong>Forkjoin</strong> — <a href="https://forkjoin.in/index.html" target="_blank">forkjoin.in</a></li>
         </ul>
       </div>
     </div>
