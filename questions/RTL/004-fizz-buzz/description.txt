@@ -1,0 +1,6 @@
+## Fizz Buzz Problem
+
+Design a circuit that counts till a maximum number of cycles `MAX_CYCLES`. At every cycle the circuit should determine if the current counter value is divisible by parameters FIZZ = 3, BUZZ = 5 or both.
+
+> TIP: use modulo counters
+> TIP: parameterize counter widths with `$clog2` function

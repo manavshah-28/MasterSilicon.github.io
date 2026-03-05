@@ -1,4 +1,4 @@
-title: Randomize to create unique values which are multiples of 3 
+title: Write constraints to randomize bit[7:0] arr[10] with unique values which also multiple of 3
 
 difficulty: Easy
 tags: randomize, constraints 

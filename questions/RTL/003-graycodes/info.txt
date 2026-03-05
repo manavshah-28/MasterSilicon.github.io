@@ -1,4 +1,4 @@
 title: GrayCodes
 difficulty: Medium
-tags: 
+tags: number system
 related:

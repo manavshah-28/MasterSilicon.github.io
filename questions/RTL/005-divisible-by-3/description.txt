@@ -1,0 +1,5 @@
+## Divisible by 3
+
+Design a circuit which can determine if an input value is evenly divisible by 3 without implementing a modulo counter.
+
+> TIP: use Deterministic Finite Automaton (DFA) method to accept binary strings and traverse an FSM

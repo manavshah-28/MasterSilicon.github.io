@@ -1,0 +1,4 @@
+title: Divisible by 5
+difficulty: Hard
+tags: FSM
+related:

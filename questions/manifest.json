@@ -60,6 +60,26 @@
       "folder": "RTL/003-graycodes"
     },
     {
+      "id": "RTL-004",
+      "category": "RTL",
+      "folder": "RTL/004-fizz-buzz"
+    },
+    {
+      "id": "RTL-005",
+      "category": "RTL",
+      "folder": "RTL/005-divisible-by-3"
+    },
+    {
+      "id": "RTL-006",
+      "category": "RTL",
+      "folder": "RTL/006-divisible-by-5"
+    },
+    {
+      "id": "RTL-007",
+      "category": "RTL",
+      "folder": "RTL/007-bubble-sort"
+    },
+    {
       "id": "DFT-001",
       "category": "DFT",
       "folder": "DFT/001-scan-ff"
