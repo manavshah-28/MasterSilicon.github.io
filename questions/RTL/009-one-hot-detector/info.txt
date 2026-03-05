@@ -1,4 +1,4 @@
-title:
-difficulty:
+title: One-Hot Detector
+difficulty: Easy
 tags: 
 related:

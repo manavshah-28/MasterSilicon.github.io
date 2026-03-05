@@ -161,6 +161,36 @@ nav {
 
 .hero-cta { display: flex; gap: 11px; flex-wrap: wrap; margin-bottom: 64px; }
 
+.hero-cta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.cta-buttons{
+  display:flex;
+  gap:12px;
+}
+
+.visit-counter{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:8px 14px;
+  border-radius:999px;   /* makes pill-shaped edges */
+
+  background:#081425;
+  border:1px solid #00e8c8;
+}
+
+.visit-counter img{
+  height:24px;
+  border-radius:999px;   /* optional */
+}
+
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
@@ -797,12 +827,25 @@ pre.cmd .c-path { color: #ce9178; }
 <!-- ═══ HOME ═══ -->
 <div class="page on" id="page-home">
   <div class="hero">
-    <div class="hero-badge"><div class="badge-dot"></div>SystemVerilog · DFT · RTL · Comp Arch</div>
+  <div class="hero-badge-row">
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      SystemVerilog · DFT · RTL · Comp Arch
+    </div>
+  </div>
     <h1 class="hero-h">Master<br>Hardware<br><span class="g">Design.</span></h1>
     <p class="hero-sub">A complete interview prep platform for chip engineers. Track your progress through RTL, DFT, verification, CDC, and computer architecture.</p>
     <div class="hero-cta">
-      <button class="btn btn-primary" onclick="goPage('tracker')">Browse Problems →</button>
-      <button class="btn btn-ghost" onclick="goPage('commands')">Setup Guide</button>
+
+      <div class="cta-buttons">
+        <button class="btn btn-primary" onclick="goPage('tracker')">Browse Problems →</button>
+        <button class="btn btn-ghost" onclick="goPage('commands')">Setup Guide</button>
+      </div>
+
+      <div class="visit-counter">
+        <img src="https://api.visitorbadge.io/api/visitors?path=modernsilicon&label=visits&labelColor=%2300e8c8&countColor=%23081425" />
+      </div>
+
     </div>
 
     <div class="stats-bar">

@@ -1,4 +1,4 @@
-title:
-difficulty:
+title: Stop Watch Timer
+difficulty: Easy
 tags: 
 related:
